@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readConfig } from './src/config/env.ts';
+import { readConfig } from './src/config/_env.ts';
 import leads from './leads/index.ts';
 import contact from './contact/index.ts';
 import quote from './quote/index.ts';

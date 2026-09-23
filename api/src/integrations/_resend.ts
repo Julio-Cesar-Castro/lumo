@@ -1,6 +1,6 @@
-import type { Config } from '../config/env.ts';
-import type { InquiryRecord, Mailer } from '../domain/inquiry.ts';
-import { inquiryNotification } from '../emails/inquiry-notification.ts';
+import type { Config } from '../config/_env.ts';
+import type { InquiryRecord, Mailer } from '../domain/_inquiry.ts';
+import { inquiryNotification } from '../emails/_inquiry-notification.ts';
 export class ResendMailer implements Mailer {
   constructor(
     private config: Config,

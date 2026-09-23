@@ -1,2 +1,2 @@
-import { route } from '../src/http/route.ts';
+import { route } from '../src/http/_route.ts';
 export default route('lead');

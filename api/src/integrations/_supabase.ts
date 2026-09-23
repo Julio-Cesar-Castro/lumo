@@ -1,4 +1,4 @@
-import type { Config } from '../config/env.ts';
+import type { Config } from '../config/_env.ts';
 export class SupabaseClient {
   constructor(
     private config: Config,

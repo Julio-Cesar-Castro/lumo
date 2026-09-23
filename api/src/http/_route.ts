@@ -1,7 +1,7 @@
 import type { ServerResponse } from 'node:http';
 import type { InquiryKind } from '@lummoo/contracts';
-import { createContainer } from '../container.ts';
-import { createHandler, type RequestWithBody } from './handler.ts';
+import { createContainer } from '../_container.ts';
+import { createHandler, type RequestWithBody } from './_handler.ts';
 export function route(kind: InquiryKind) {
   let handler: ReturnType<typeof createHandler> | undefined;
   return async (req: RequestWithBody, res: ServerResponse) => {

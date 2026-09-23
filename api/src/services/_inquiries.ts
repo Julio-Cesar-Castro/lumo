@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { schemas, type InquiryKind } from '@lummoo/contracts';
 import { z } from 'zod';
-import type { InquiryRecord, InquiryRepository, Mailer } from '../domain/inquiry.ts';
-import { HttpError } from '../lib/errors.ts';
+import type { InquiryRecord, InquiryRepository, Mailer } from '../domain/_inquiry.ts';
+import { HttpError } from '../lib/_errors.ts';
 export class InquiryService {
   constructor(
     private repository: InquiryRepository,

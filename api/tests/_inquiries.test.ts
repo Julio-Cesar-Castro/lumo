@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
-import type { InquiryRecord, InquiryRepository, Mailer } from '../src/domain/inquiry.ts';
-import { InquiryService } from '../src/services/inquiries.ts';
-import { createHandler } from '../src/http/handler.ts';
-import { readConfig } from '../src/config/env.ts';
-import { ResendMailer } from '../src/integrations/resend.ts';
-import { SupabaseClient } from '../src/integrations/supabase.ts';
+import type { InquiryRecord, InquiryRepository, Mailer } from '../src/domain/_inquiry.ts';
+import { InquiryService } from '../src/services/_inquiries.ts';
+import { createHandler } from '../src/http/_handler.ts';
+import { readConfig } from '../src/config/_env.ts';
+import { ResendMailer } from '../src/integrations/_resend.ts';
+import { SupabaseClient } from '../src/integrations/_supabase.ts';
 const config = readConfig({
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SECRET_KEY: 'test-only-secret-key-long',

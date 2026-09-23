@@ -1,4 +1,4 @@
-import type { InquiryRecord } from '../domain/inquiry.ts';
+import type { InquiryRecord } from '../domain/_inquiry.ts';
 const titles = { lead: 'Novo lead', contact: 'Nova mensagem', quote: 'Pedido de orçamento' };
 export function inquiryNotification(record: InquiryRecord) {
   const data = record.payload;

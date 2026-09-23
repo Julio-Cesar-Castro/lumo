@@ -1,10 +1,10 @@
 import { createHmac } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { InquiryKind } from '@lummoo/contracts';
-import type { InquiryRepository } from '../domain/inquiry.ts';
-import type { InquiryService } from '../services/inquiries.ts';
-import type { Config } from '../config/env.ts';
-import { HttpError } from '../lib/errors.ts';
+import type { InquiryRepository } from '../domain/_inquiry.ts';
+import type { InquiryService } from '../services/_inquiries.ts';
+import type { Config } from '../config/_env.ts';
+import { HttpError } from '../lib/_errors.ts';
 export interface RequestWithBody extends IncomingMessage {
   body?: unknown;
 }

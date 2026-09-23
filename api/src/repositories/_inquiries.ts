@@ -1,5 +1,5 @@
-import type { InquiryRecord, InquiryRepository } from '../domain/inquiry.ts';
-import { SupabaseClient } from '../integrations/supabase.ts';
+import type { InquiryRecord, InquiryRepository } from '../domain/_inquiry.ts';
+import { SupabaseClient } from '../integrations/_supabase.ts';
 export class SupabaseInquiryRepository implements InquiryRepository {
   constructor(private client: SupabaseClient) {}
   consumeRateLimit(key: string) {

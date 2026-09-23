@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file-if-exists=.env server.ts",
+    "dev": "tsx watch --env-file-if-exists=.env _server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "start": "node --env-file-if-exists=.env dist/server.js",
-    "test": "pnpm build && node --test dist/tests/*.test.js",
-    "retry-emails": "tsx --env-file-if-exists=.env scripts/retry-emails.ts"
+    "start": "node --env-file-if-exists=.env dist/_server.js",
+    "test": "pnpm build && node --test dist/tests/*_inquiries.test.js",
+    "retry-emails": "tsx --env-file-if-exists=.env scripts/_retry-emails.ts"
   },
   "dependencies": {
     "@lummoo/contracts": "workspace:*",

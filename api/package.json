@@ -1,0 +1,22 @@
+{
+  "name": "@lummoo/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "test": "pnpm build && node --test dist/tests/*.test.js",
+    "retry-emails": "tsx --env-file-if-exists=.env scripts/retry-emails.ts"
+  },
+  "dependencies": {
+    "@lummoo/contracts": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "typescript": "5.9.3",
+    "tsx": "^4.20.6"
+  }
+}

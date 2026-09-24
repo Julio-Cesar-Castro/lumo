@@ -21,7 +21,12 @@ export class ResendMailer implements Mailer {
       }),
       signal: AbortSignal.timeout(8000),
     });
-    if (!response.ok) throw new Error(`Resend request failed (${response.status})`);
+    if (!response.ok) {
+      // Only log the provider's machine-readable code; its message may contain addresses.
+      const error = (await response.json().catch(() => ({}))) as { name?: unknown };
+      const code = typeof error.name === 'string' ? error.name : 'unknown';
+      throw new Error(`Resend request failed (${response.status}, ${code})`);
+    }
     const data = (await response.json()) as { id?: string };
     if (!data.id) throw new Error('Resend returned no message identifier');
     return data.id;

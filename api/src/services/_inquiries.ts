@@ -12,6 +12,7 @@ export class InquiryService {
   ) {}
   async notify(record: InquiryRecord) {
     if (record.notification_status === 'sent') return;
+    let stage: 'start_notification' | 'send_email' | 'mark_sent' = 'start_notification';
     try {
       const startedAt = await this.repository.startNotification(record.id);
       // Resend retains idempotency keys for 24h. Older ambiguous attempts require manual reconciliation.
@@ -19,10 +20,17 @@ export class InquiryService {
         this.report('email_requires_manual_review', record.id);
         return;
       }
+      stage = 'send_email';
       const resendId = await this.mailer.send(record);
+      stage = 'mark_sent';
       await this.repository.markNotification(record.id, 'sent', resendId);
-    } catch {
+    } catch (error) {
       this.report('email_notification_failed', record.id);
+      console.error('email_notification_failure_details', {
+        id: record.id,
+        stage,
+        reason: error instanceof Error ? error.message : 'unknown',
+      });
       try {
         await this.repository.markNotification(record.id, 'failed');
       } catch {

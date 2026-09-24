@@ -8,13 +8,12 @@ export class ResendMailer implements Mailer {
     private request: typeof fetch = fetch,
   ) {}
   async send(record: InquiryRecord) {
-    return this.deliver(record, [this.config.LEADS_EMAIL_TO], inquiryNotification(record), `inquiry/${record.id}`);
+    return this.deliver([this.config.LEADS_EMAIL_TO], inquiryNotification(record), `inquiry/${record.id}`);
   }
   async sendReceipt(record: InquiryRecord) {
-    return this.deliver(record, [record.payload.email], inquiryReceipt(record), `inquiry-receipt/${record.id}`);
+    return this.deliver([record.payload.email], inquiryReceipt(record), `inquiry-receipt/${record.id}`);
   }
   private async deliver(
-    record: InquiryRecord,
     recipients: string[],
     content: ReturnType<typeof inquiryNotification> | ReturnType<typeof inquiryReceipt>,
     idempotencyKey: string,

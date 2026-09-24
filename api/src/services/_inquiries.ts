@@ -24,6 +24,14 @@ export class InquiryService {
       const resendId = await this.mailer.send(record);
       stage = 'mark_sent';
       await this.repository.markNotification(record.id, 'sent', resendId);
+      try {
+        await this.mailer.sendReceipt(record);
+      } catch (error) {
+        console.error('customer_receipt_failed', {
+          id: record.id,
+          reason: error instanceof Error ? error.message : 'unknown',
+        });
+      }
     } catch (error) {
       this.report('email_notification_failed', record.id);
       console.error('email_notification_failure_details', {

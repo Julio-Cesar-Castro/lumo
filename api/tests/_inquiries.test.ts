@@ -56,14 +56,19 @@ class MemoryRepository implements InquiryRepository {
 function setup() {
   const repository = new MemoryRepository();
   let sends = 0;
+  let receipts = 0;
   const mailer: Mailer = {
     async send() {
       sends++;
       return 'email-test';
     },
+    async sendReceipt() {
+      receipts++;
+      return 'receipt-test';
+    },
   };
   const service = new InquiryService(repository, mailer, () => {});
-  return { repository, mailer, service, sends: () => sends };
+  return { repository, mailer, service, sends: () => sends, receipts: () => receipts };
 }
 test('lead is persisted before notification; identical retry does not duplicate', async () => {
   const ctx = setup();
@@ -72,6 +77,7 @@ test('lead is persisted before notification; identical retry does not duplicate'
   assert.equal(ctx.repository.records.get(id)?.notification_status, 'sent');
   await ctx.service.submit('lead', input, id);
   assert.equal(ctx.sends(), 1);
+  assert.equal(ctx.receipts(), 1);
   await assert.rejects(
     ctx.service.submit('lead', { ...input, name: 'Outra pessoa' }, id),
     /Identificador já usado/,
@@ -91,9 +97,11 @@ test('mail failure preserves lead and explicit retry updates status', async () =
   };
   assert.deepEqual(await ctx.service.submit('lead', input, id), { ok: true });
   assert.equal(ctx.repository.records.get(id)?.notification_status, 'failed');
+  assert.equal(ctx.receipts(), 0);
   ctx.mailer.send = async () => 'retried-email';
   await ctx.service.notify(ctx.repository.records.get(id)!);
   assert.equal(ctx.repository.records.get(id)?.resend_id, 'retried-email');
+  assert.equal(ctx.receipts(), 1);
 });
 test('database failure never sends mail or reports success', async () => {
   const ctx = setup();
@@ -161,7 +169,15 @@ test('provider adapters use server-only keys, stable email idempotency and plain
   const body = JSON.parse(captured?.body as string);
   assert.deepEqual(body.to, ['team@example.com']);
   assert.equal(body.reply_to, input.email);
-  assert.ok(!body.html);
+  assert.ok(body.html.includes('Mensagem do cliente'));
+  assert.ok(body.text.includes('Cliente Teste'));
+  assert.equal(await mailer.sendReceipt(record), 'provider-id');
+  assert.equal(new Headers(captured?.headers).get('Idempotency-Key'), `inquiry-receipt/${id}`);
+  const receipt = JSON.parse(captured?.body as string);
+  assert.deepEqual(receipt.to, [input.email]);
+  assert.ok(receipt.html.includes('Olá, Cliente!'));
+  assert.ok(receipt.text.includes('Olá, Cliente!'));
+  assert.equal(receipt.reply_to, undefined);
   const db = new SupabaseClient(config, async (_url, init) => {
     captured = init;
     return Response.json([]);
@@ -171,4 +187,25 @@ test('provider adapters use server-only keys, stable email idempotency and plain
   assert.equal(new Headers(captured?.headers).has('Authorization'), false);
   const failed = new ResendMailer(config, async () => new Response('error', { status: 503 }));
   await assert.rejects(failed.send(record));
+});
+
+test('customer email failure leaves owner notification marked sent', async () => {
+  const ctx = setup();
+  ctx.mailer.sendReceipt = async () => { throw new Error('receipt unavailable'); };
+  await ctx.service.submit('lead', input, id);
+  assert.equal(ctx.repository.records.get(id)?.notification_status, 'sent');
+  assert.equal(ctx.sends(), 1);
+  await ctx.service.submit('lead', input, id);
+  assert.equal(ctx.sends(), 1);
+});
+
+test('customer supplied text is escaped in both HTML templates', async () => {
+  const ctx = setup();
+  const malicious = { ...input, name: '<img src=x onerror=alert(1)>', message: '<script>bad()</script>' };
+  await ctx.service.submit('lead', malicious, id);
+  const record = ctx.repository.records.get(id)!;
+  const { inquiryReceipt } = await import('../src/emails/_inquiry-receipt.ts');
+  const { inquiryNotification } = await import('../src/emails/_inquiry-notification.ts');
+  assert.ok(!inquiryReceipt(record).html.includes('<img'));
+  assert.ok(!inquiryNotification(record).html.includes('<script>'));
 });

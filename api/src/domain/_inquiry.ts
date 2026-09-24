@@ -18,4 +18,5 @@ export interface InquiryRepository {
 }
 export interface Mailer {
   send(record: InquiryRecord): Promise<string>;
+  sendReceipt(record: InquiryRecord): Promise<string>;
 }

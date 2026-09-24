@@ -1,23 +1,34 @@
 import type { Config } from '../config/_env.ts';
 import type { InquiryRecord, Mailer } from '../domain/_inquiry.ts';
 import { inquiryNotification } from '../emails/_inquiry-notification.ts';
+import { inquiryReceipt } from '../emails/_inquiry-receipt.ts';
 export class ResendMailer implements Mailer {
   constructor(
     private config: Config,
     private request: typeof fetch = fetch,
   ) {}
   async send(record: InquiryRecord) {
+    return this.deliver([this.config.LEADS_EMAIL_TO], inquiryNotification(record), `inquiry/${record.id}`);
+  }
+  async sendReceipt(record: InquiryRecord) {
+    return this.deliver([record.payload.email], inquiryReceipt(record), `inquiry-receipt/${record.id}`);
+  }
+  private async deliver(
+    recipients: string[],
+    content: ReturnType<typeof inquiryNotification> | ReturnType<typeof inquiryReceipt>,
+    idempotencyKey: string,
+  ) {
     const response = await this.request('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.config.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `inquiry/${record.id}`,
+        'Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify({
         from: this.config.EMAIL_FROM,
-        to: [this.config.LEADS_EMAIL_TO],
-        ...inquiryNotification(record),
+        to: recipients,
+        ...content,
       }),
       signal: AbortSignal.timeout(8000),
     });

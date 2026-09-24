@@ -11,8 +11,12 @@ export function route(kind: InquiryKind) {
         handler = createHandler(kind, config, repository, service);
       }
       await handler(req, res);
-    } catch {
-      console.error('api_configuration_missing');
+    } catch (error) {
+      // readConfig reports variable names only; never include environment values in logs.
+      const reason = error instanceof Error && error.message.startsWith('Configure as variáveis:')
+        ? error.message
+        : 'unexpected_initialization_error';
+      console.error('api_configuration_missing', { reason });
       res.writeHead(503, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
       res.end(
         JSON.stringify({
